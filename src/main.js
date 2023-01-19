@@ -1,19 +1,24 @@
-const Discord = require('discord.js')
-const client = new Discord.Client();
-require('dotenv').config();
+const token = require('./token');
+const Discord = require('discord.js');
+const client = new Discord.Client({Intents: ["MessageContent"]});
 
 
-//A instrução client.on é utilizada para verificar eventos.
+const onlineBot = () => {
+    client.login(token)
 
-client.on("ready", () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-});
+    .then(
+    client.on('ready', () =>{
+        console.log(`O ${client.user.tag} FOI LOGADO COM SUCESSO!`);
+    }))
 
-client.on("message", msg =>{
-    //msg.content verifica oque está escrito na mensagem.
-    if(msg.content === "ping"){
-        msg.reply("pong");
-    };
-});
+    .catch((err)=>{
+        console.log(`Erro ao iniciar o bot: ${err.message}`);
+    });
 
-client.login(process.env.CLIENT_TOKEN);
+    client.on('ready', () =>{
+        client.user.setStatus("dnd");
+        client.user.setActivity("Bot do Cainho Está Online.")
+    });
+}
+
+module.exports = onlineBot;
