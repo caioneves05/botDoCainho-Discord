@@ -1,9 +1,13 @@
 const token = require('./token');
-const Discord = require('discord.js');
-const client = new Discord.Client({Intents: ["MessageContent"]});
+const { Client, Intents } = require('discord.js');
 
+const client = new Client ({
+    intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_MESSAGES,
+    ],
+});
 
-const onlineBot = () => {
     client.login(token)
 
     .then(
@@ -19,6 +23,11 @@ const onlineBot = () => {
         client.user.setStatus("dnd");
         client.user.setActivity("Bot do Cainho Está Online.")
     });
-}
 
-module.exports = onlineBot;
+    client.on('messageCreate', (message) => {
+        if(message.author.bot) return;
+
+        if(message.content === 'ping'){
+            message.channel.send(`O ping do bot é de estimados ${client.ws.ping}.`);
+        }
+    });
