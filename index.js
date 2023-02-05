@@ -1,38 +1,55 @@
+const Discord = require("discord.js");
+
+//Importando as Intents(permissão do Bot).
+
+const client = new Discord.Client({ 
+    intents: [ 
+        "Guilds", 
+        "GuildMembers", 
+        "MessageContent", 
+        "GuildMessages" 
+    ]
+});
+
 require('dotenv').config();
-const { Client, GatewayIntentBits, Partials} = require('discord.js');
 
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMessageReactions,
-    ],
-    partials: [
-        Partials.Message,
-        Partials.GuildMember,
-        Partials.Reaction,
-        Partials.User,
-        Partials.Channel,
-    ],
+module.exports = client;
+
+//Quando acontecer alguma interação do tipo ApplicationCommand com o bot. 
+client.on('interactionCreate', (interaction) => {
+
+    if(interaction.type === Discord.InteractionType.ApplicationCommand){
+        
+        //pega o nome do comando que o usuário está solicitando
+        const cmd = client.slashCommands.get(interaction.commandName);
+        
+        //Retorna um erro se não existir esse comando.
+        if (!cmd) return interaction.reply(`Error`);
+  
+        interaction["member"] = interaction.guild.members.cache.get(interaction.user.id);
+        
+        //Executando o comando solicitado.
+        cmd.run(client, interaction);
+  
+     }
 });
 
-client.on('ready', () =>{
-    console.log(`Bot está rodando com sucesso!`);
-});
-
-client.on('messageCreate', (message) => {
-    if(message.author.bot) return;
-    if(message.content === 'ping'){
-        message.channel.send(`O ping do bot é  de estimados ${client.ws.ping}ms.`);
-    }
-})
+//Quando o Bot estiver Online, ele executará essas instruções.
 
 client.on('ready', () => {
-    client.user.setStatus("dnd");
-    client.user.setActivity("Bot do Cainho está ON.");
+    console.log(`${client.user.username} está Online.`);
+
+    client.user.setActivity({ 
+        name: 'Estudando sobre JavaScript e a Library Discord.js V14.',
+        type: Discord.ActivityType.Streaming
+    });
 });
 
+//Coleção que armazena os comandos do Bot.
+client,slashCommands = new Discord.Collection();
+
+require('./handler')(client);
+
 client.login(process.env.TOKEN);
+
+
